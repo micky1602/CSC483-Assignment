@@ -1,0 +1,183 @@
+import java.util.*;
+
+// Product Class
+class Product {
+    int productId;
+    String productName;
+    String category;
+    double price;
+    int stockQuantity;
+
+    public Product(int id, String name, String category, double price, int stock) {
+        this.productId = id;
+        this.productName = name;
+        this.category = category;
+        this.price = price;
+        this.stockQuantity = stock;
+    }
+
+    public int getProductId() {
+        return productId;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+}
+
+public class CSC483_AllCode {
+
+    // ===============================
+    // GENERATE DATASET
+    // ===============================
+    public static Product[] generateProducts(int n) {
+        Random rand = new Random();
+        Product[] products = new Product[n];
+
+        for (int i = 0; i < n; i++) {
+            int id = rand.nextInt(200000) + 1;
+            products[i] = new Product(
+                    id,
+                    "Product" + i,
+                    "Category",
+                    rand.nextDouble() * 1000,
+                    rand.nextInt(100)
+            );
+        }
+        return products;
+    }
+
+    // ===============================
+    // SEQUENTIAL SEARCH
+    // ===============================
+    public static Product sequentialSearch(Product[] products, int targetId) {
+        for (Product p : products) {
+            if (p.productId == targetId) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    // ===============================
+    // BINARY SEARCH
+    // ===============================
+    public static Product binarySearch(Product[] products, int targetId) {
+        int left = 0;
+        int right = products.length - 1;
+
+        while (left <= right) {
+            int mid = (left + right) / 2;
+
+            if (products[mid].productId == targetId) {
+                return products[mid];
+            } else if (products[mid].productId < targetId) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return null;
+    }
+
+    // ===============================
+    // SEARCH BY NAME
+    // ===============================
+    public static Product searchByName(Product[] products, String targetName) {
+        for (Product p : products) {
+            if (p.productName.equalsIgnoreCase(targetName)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    // ===============================
+    // HYBRID STRUCTURE (HASHMAP)
+    // ===============================
+    static HashMap<String, Product> nameIndex = new HashMap<>();
+
+    public static void addProduct(List<Product> products, Product newProduct) {
+        products.add(newProduct);
+
+        // Maintain sorted order
+        products.sort(Comparator.comparingInt(p -> p.productId));
+
+        // Update hashmap index
+        nameIndex.put(newProduct.productName, newProduct);
+    }
+
+    // ===============================
+    // MAIN TEST PROGRAM
+    // ===============================
+    public static void main(String[] args) {
+
+        int n = 100000;
+        Product[] products = generateProducts(n);
+
+        // Sort for binary search
+        Arrays.sort(products, Comparator.comparingInt(p -> p.productId));
+
+        // Test Cases
+        int bestCaseId = products[0].productId;
+        int averageCaseId = products[n / 2].productId;
+        int worstCaseId = -1;
+
+        System.out.println("========================================");
+        System.out.println(" SEARCH PERFORMANCE RESULTS ");
+        System.out.println("========================================");
+
+        long start, end;
+
+        // ===============================
+        // SEQUENTIAL SEARCH TESTS
+        // ===============================
+        System.out.println("\nSequential Search:");
+
+        start = System.nanoTime();
+        sequentialSearch(products, bestCaseId);
+        end = System.nanoTime();
+        System.out.println("Best Case: " + (end - start) / 1e6 + " ms");
+
+        start = System.nanoTime();
+        sequentialSearch(products, averageCaseId);
+        end = System.nanoTime();
+        System.out.println("Average Case: " + (end - start) / 1e6 + " ms");
+
+        start = System.nanoTime();
+        sequentialSearch(products, worstCaseId);
+        end = System.nanoTime();
+        System.out.println("Worst Case: " + (end - start) / 1e6 + " ms");
+
+        // ===============================
+        // BINARY SEARCH TESTS
+        // ===============================
+        System.out.println("\nBinary Search:");
+
+        start = System.nanoTime();
+        binarySearch(products, bestCaseId);
+        end = System.nanoTime();
+        System.out.println("Best Case: " + (end - start) / 1e6 + " ms");
+
+        start = System.nanoTime();
+        binarySearch(products, averageCaseId);
+        end = System.nanoTime();
+        System.out.println("Average Case: " + (end - start) / 1e6 + " ms");
+
+        start = System.nanoTime();
+        binarySearch(products, worstCaseId);
+        end = System.nanoTime();
+        System.out.println("Worst Case: " + (end - start) / 1e6 + " ms");
+
+        // ===============================
+        // HYBRID TEST (ADD PRODUCT)
+        // ===============================
+        List<Product> productList = new ArrayList<>(Arrays.asList(products));
+
+        Product newProduct = new Product(300001, "NewProduct", "Category", 500.0, 10);
+        addProduct(productList, newProduct);
+
+        System.out.println("\nHybrid Add Product Test:");
+        System.out.println("New product added and indexed successfully.");
+    }
+}
